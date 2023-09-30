@@ -105,9 +105,12 @@ with col2:
 st.markdown("<hr>", unsafe_allow_html=True)
 
 
-
-# Predict Button
-if st.button("Predict"):
+# Predict button with custom CSS style
+predict_button_style = (
+    f"background-color: #3498db; color: white; border-radius: 5px; padding: 10px; cursor: pointer;"
+)
+button_clicked = st.button("Predict", key="predict_button", on_click=None)
+if button_clicked:
     # Prepare input data for prediction
     # Prepare input data for prediction
     # Create a DataFrame with all required columns except "sales"
@@ -132,3 +135,16 @@ if st.button("Predict"):
 
     # Display the prediction
     prediction_placeholder.text(f"Predicted Value for sales: {prediction[0]}")
+   
+    if prediction >= 0:
+        prediction_placeholder.markdown(
+            f'Predicted Value for sales: <span style="background-color: green; padding: 2px 5px; border-radius: 5px;">{prediction[0]}</span>',
+            unsafe_allow_html=True
+        )
+    else:
+        prediction_placeholder.markdown(
+            f'Predicted Value for sales: <span style="background-color: red; padding: 2px 5px; border-radius: 5px;">{prediction[0]}</span>',
+            unsafe_allow_html=True
+        )
+
+   
