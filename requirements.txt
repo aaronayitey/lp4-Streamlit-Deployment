@@ -1,3 +1,4 @@
+streamlit
 alabaster @ file:///home/ktietz/src/ci/alabaster_1611921544520/work
 altair==5.1.1
 anaconda-client==1.11.2
