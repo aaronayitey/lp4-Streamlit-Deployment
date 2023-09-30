@@ -1,10 +1,20 @@
 import streamlit as st
 import joblib
 import numpy as np
+import pandas as pd
+# Machine Learning Modeling
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import RandomizedSearchCV
+import xgboost as xgb
+from sklearn.metrics import mean_squared_error
+
+
 
 # Load the pre-trained model and preprocessor
-# model = joblib.load('model.pkl')
-# preprocessor = joblib.load('preprocessor.pkl')
+model = joblib.load('./xgb_model.joblib')
+preprocessor = joblib.load('./preprocessor.joblib')
 
 # Set the page layout to full width
 st.set_page_config(layout="wide")
@@ -37,45 +47,88 @@ col1, col2 = st.columns(2)
 
 # User Inputs - Number
 with col1:
-    number = st.number_input("Enter Number", min_value=1, step=1)
+    # Create a date input using st.date_input
+    date = st.date_input("Enter Date")  
+
+    # Convert the selected date to a string in the desired format (e.g., YYYY-MM-DD)
+    formatted_date = date.strftime('%Y-%m-%d')  
 
 # User Inputs - Year
 with col2:
-    year = st.slider("Select Year", 2013, 2023, 2023)
-
-# Add custom spacing between columns
-st.markdown("<hr>", unsafe_allow_html=True)
-
-# User Inputs - Transaction
-with col1:
-    transaction = st.number_input("Enter Transaction", min_value=1, step=1)
+    family = st.selectbox("Select product family", ['CELEBRATION', 'CLEANING', 'DAIRY', 'DELI', 'EGGS', 'FROZEN FOODS',
+       'GROCERY I', 'GROCERY II', 'HARDWARE', 'HOME AND KITCHEN I',
+       'HOME AND KITCHEN II', 'HOME APPLIANCES', 'HOME CARE',
+       'LADIESWEAR', 'LAWN AND GARDEN', 'LINGERIE', 'LIQUOR,WINE,BEER',
+       'MAGAZINES', 'MEATS', 'PERSONAL CARE', 'PET SUPPLIES',
+       'PLAYERS AND ELECTRONICS', 'POULTRY', 'PREPARED FOODS', 'PRODUCE',
+       'SCHOOL AND OFFICE SUPPLIES', 'SEAFOOD', 'AUTOMOTIVE', 'BABY CARE',
+       'BEAUTY', 'BEVERAGES', 'BOOKS', 'BREAD/BAKERY'])
 
 # User Inputs - On Promotion
+with col1:
+    onpromotion = st.number_input("Enter Number for onpromotion", min_value=0, step=1)
+
+# # Add custom spacing between columns
+# st.markdown("<hr>", unsafe_allow_html=True)
+
+# User Inputs - Day of the Week
 with col2:
-    onpromotion = st.selectbox("Select On Promotion", ["Yes", "No"])
+    city = st.selectbox("Select city", ['Quito', 'Cayambe', 'Latacunga', 'Riobamba', 'Ibarra',
+       'Santo Domingo', 'Guaranda', 'Puyo', 'Ambato', 'Guayaquil',
+       'Salinas', 'Daule', 'Babahoyo', 'Quevedo', 'Playas', 'Libertad',
+       'Cuenca', 'Loja', 'Machala', 'Esmeraldas', 'Manta', 'El Carmen'])
+
+# User Inputs - Product Category
+with col1:
+    oil_prices = st.number_input("Enter Number for oil prices", min_value=1, step=1)
+
+
+# # Add custom spacing between columns
+# st.markdown("<hr>", unsafe_allow_html=True)
+
+# User Inputs - Day of the Week
+with col2:
+    holiday_type = st.selectbox("Select holiday type", ['Holiday', 'Additional', 'Transfer', 'Event', 'Bridge'])
+
+# User Inputs - Product Category
+with col1:
+    sales_lag_1 = st.number_input("Enter Number for sales lag", min_value=0, step=1)
+
+
+# User Inputs - Day of the Week
+with col2:
+    moving_average = st.number_input("Enter Number for moving average", min_value=0, step=1)
+
+# Placeholder for Predicted Value
 
 # Add custom spacing between columns
 st.markdown("<hr>", unsafe_allow_html=True)
 
-# User Inputs - Day of the Week
-with col1:
-    day_of_week = st.selectbox("Select Day of the Week", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
 
-# User Inputs - Product Category
-with col2:
-    product_category = st.text_input("Enter Product Category")
-
-# Placeholder for Predicted Value
-prediction_placeholder = st.empty()
 
 # Predict Button
 if st.button("Predict"):
     # Prepare input data for prediction
-    input_data = np.array([[number, year, transaction, onpromotion, day_of_week, product_category]])
-    # preprocessed_data = preprocessor.transform(input_data)
+    # Prepare input data for prediction
+    # Create a DataFrame with all required columns except "sales"
+    prediction_placeholder = st.empty()
+    input_df = pd.DataFrame({
+        "family": [family],
+        "onpromotion": [onpromotion],
+        "city": [city],
+        "oil_prices": [oil_prices],
+        "holiday_type": [holiday_type],
+        "sales_lag_1": [sales_lag_1],
+        "moving_average": [moving_average]
+    })
+    
+    # Transform the input DataFrame using the preprocessor
+    preprocessed_data = preprocessor.transform(input_df)
+    
+
 
     # Make a prediction
-    # prediction = model.predict(preprocessed_data)
+    prediction = model.predict(preprocessed_data)
 
     # Display the prediction
-    # prediction_placeholder.text(f"Predicted Value: {prediction[0]}")
+    prediction_placeholder.text(f"Predicted Value for sales: {prediction[0]}")
